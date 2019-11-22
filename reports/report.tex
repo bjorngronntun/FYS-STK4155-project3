@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{amssymb}
 
 \title{Project 3 on Machine Learning: Solving partial differential equations with neural networks}
 \author{Bj{\o}rn Gr{\o}nntun}
@@ -11,9 +12,76 @@
     This is rather abstract.
 \end{abstract}
 
-\section{Heat equation - a physical interpretation}
+\section{Heat equation - physical interpretation and analytical solution}
+If we have a rod of length $L=1$ with no lateral temperature loss, the temperature in the interior points of the rod can be modelled by a function $u(x, t)$, where $x\in (0, 1)$ is the distance from left point of the rod and $t$ is time. It is well established that the interior temperature will conform to the heat equation
 
-\section{Analytical solution}
+\begin{equation}
+    u_t = \alpha^2 u_{xx}
+\end{equation}
+
+For simplicity, we will let $\alpha=1$. As boundary condition, we will impose that the endpoints of the rod be kept at temperature 0. Initially, the temperature profile is given by $u(x, 0) = \sin(\pi x)$. This means we will have the initial temperature profile:
+
+\begin{figure}
+
+\end{figure}
+
+Thus, the intitial-boundary value problem we are going to study is as follows:
+
+\begin{equation}
+    u_t = u_{xx}
+    u(0, t) = u(1, t) = 0
+    u(x, 0) = \sin(\pi x)
+\end{equation}
+
+The analytical solution to this problem can be found by the classical technique of separation by variables. Even if this derivation is given in every text on PDEs, we now proceed to give a quick sketch of this method. To start with, we look for solutions of the form $u(x, t) = X(x) T(t)$. This substitution transforms the PDE to $X(x) T'(t) = X''(x) T(t)$, which means that
+
+\begin{equation}
+    \frac{T'(t)}{T(t)} = \frac{X''(x)}{X(x)}
+\end{equation}
+
+As the left side of this equation depends solely on $t$ and the right side depends solely on $x$, the two sides must be equal to a common constant. Furthermore, this constant must be negative. (Explanation). This leads to the two ODEs
+
+\begin{equation}
+    T'(t) + \lambda^2 T(t) = 0\label{eq:1}
+\end{equation}
+and
+\begin{equation}
+    X''(x) + \lambda^2 X(x) = 0\label{eq:2}
+\end{equation}
+
+These equations are very easy to solve. \eqref{eq:1} has the general solution
+
+\begin{equation}
+    T(t) = C e^{-\lambda^2 t}
+\end{equation}
+
+whereas \eqref{eq:2} has the general solution
+
+\begin{equation}
+    X(x) = D \sin(\lambda x) + E \cos(\lambda x)
+\end{equation}
+
+Here, $C$, $D$ and $E$ are arbitrary constants. Thus the PDE is satisfied by all functions of the form
+
+\begin{equation}
+    u(x, t) = e^{-\lambda^2 t}[A \sin(\lambda x) + B \cos(\lambda x)]\label{eq:3}
+\end{equation}
+
+where $A$ and $B$ are arbitrary constants.
+
+Now, we want to bring in the boundary conditions, the first of which is $u(0, t) = 0$. Putting $x=0$ in \eqref{eq:3}, we obtain $B e^{-\lambda^2 t} = 0$, so $B$ must be equal to 0. The second boundary condition, $u(1, t)$, now yields
+
+\begin{equation}
+    A e^{-\lambda^2 t} \sin(\lambda) = 0
+\end{equation}
+
+As can be seen, we must either have $A=0$, leading to the trivial solution $u\equiv 0$, or $\sin(\lambda) = 0$. Thus, $\lambda$ has to be an integer multiple of $\pi$. This leads to an entire family of solutions satisfying both the PDE and the boundary conditions. This family is given by
+
+\begin{equation}
+    u_n(x, t) = A_n e^{-(n \pi)^2} sin(n \pi x)
+\end{equation}
+
+where $n \in \mathbb{Z}^{+}$
 
 \section{Finite difference scheme - theory}
 
