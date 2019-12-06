@@ -19,17 +19,15 @@ If we have a rod of length $L=1$ with no lateral temperature loss, the temperatu
     u_t = \alpha^2 u_{xx}
 \end{equation}
 
-For simplicity, we will let $\alpha=1$. As boundary condition, we will impose that the endpoints of the rod be kept at temperature 0. Initially, the temperature profile is given by $u(x, 0) = \sin(\pi x)$. This means we will have the initial temperature profile:
-
-\begin{figure}
-
-\end{figure}
-
-Thus, the intitial-boundary value problem we are going to study is as follows:
+For simplicity, we will let $\alpha=1$. As boundary condition, we will impose that the endpoints of the rod be kept at temperature 0. Initially, the temperature profile is given by $u(x, 0) = \sin(\pi x)$. Thus, the intitial-boundary value problem we are going to study is as follows:
 
 \begin{equation}
     u_t = u_{xx}
+\end{equation}
+\begin{equation}
     u(0, t) = u(1, t) = 0
+\end{equation}
+\begin{equation}
     u(x, 0) = \sin(\pi x)
 \end{equation}
 
@@ -78,14 +76,89 @@ Now, we want to bring in the boundary conditions, the first of which is $u(0, t)
 As can be seen, we must either have $A=0$, leading to the trivial solution $u\equiv 0$, or $\sin(\lambda) = 0$. Thus, $\lambda$ has to be an integer multiple of $\pi$. This leads to an entire family of solutions satisfying both the PDE and the boundary conditions. This family is given by
 
 \begin{equation}
-    u_n(x, t) = A_n e^{-(n \pi)^2} sin(n \pi x)
+    u_n(x, t) = A_n e^{-(n \pi)^2 t} \sin(n \pi x)
 \end{equation}
 
-where $n \in \mathbb{Z}^{+}$
+where $n \in \mathbb{Z}^{+}$.
+
+It is easily verified that any linear combination of solutions satisfying the PDE and the boundary conditions will again be a solution. This leads us to consider solutions of the form
+
+\begin{equation}
+    u(x, t) = \sum_{n=1}^{\infty}{A_n e^{-(n \pi)^2 t} \sin(n \pi x)}
+\end{equation}
+
+In order that the solution satisfy the initial condition $u(x, 0) = \sin(\pi x)$, we put
+
+\begin{equation}
+    u(x, 0) = \sin(\pi x)
+\end{equation}
+
+that is
+
+\begin{equation}
+    \sum_{n=1}^{\infty}{A_n  sin(n \pi x)} = \sin(\pi x)
+\end{equation}
+
+In order to satisfy this equation, we simply let $A_1 = 1$ and $A_n = 0$ for $n \neq 1$. Now we finally have reached our analytical solution:
+
+\begin{equation}
+    u(x, t) = e^{-\pi^2 t} \sin(\pi x)
+\end{equation}
+
+It is easily verified that this solution satisfy the PDE, the boundary conditions and the initial condition. It can be shown that the solution is unique.
+
+\section{Numerical methods - overview}
+We seek a bivariate function, defined on $[0, 1] \times \mathbb{R}^+$. Of course, in a numerical setting we have to constrain the function domain somewhat: We choose to construct a grid of points on $[0, 1] \times [0, 1]$. If there are $n + 1$ grid lines parallell to the $t$ axis and $m + 1$ grid lines parallell to the $x$ axis, the distance between the grid lines when we move in the $x$ direction is $h = 1/n$ and the distance between the grid lines when we move in the $t$ direction is $k = 1/m$. The values for $x$ and $t$ will thus be given by
+
+\begin{equation}
+    x_j = jh
+\end{equation}
+
+where $j = 0, 1, ..., n$
+
+and
+
+\begin{equation}
+    t_i = ik
+\end{equation}
+
+where $i = 0, 1, ..., m$.
 
 \section{Finite difference scheme - theory}
+In order to construct a finite-difference scheme to solve the heat equation, we use truncated forms of the Taylor series for $u$ to obtain the following approximations:
 
-\section{Finite difference scheme - implementation}
+\begin{equation}
+    u_t = \frac{1}{k}[u(x, t + k) - u(x, k)]
+\end{equation}
+
+and
+
+\begin{equation}
+    u_{xx} = \frac{1}{h^2}[u(x + h, t) - 2u(x, t) + u(x - h, t)]
+\end{equation}
+
+By using the notation $u_{i, j}$ for $u(x_j, t_i)$, we can write these equations as
+
+\begin{equation}
+    u_t = \frac{1}{k}[u_{i + 1, j} - u_{i, j}]
+\end{equation}
+
+and
+
+\begin{equation}
+    u_{xx} = \frac{1}{h^2}[u_{i, j+1} - 2u_{i, j} + u_{i, j-1}]
+\end{equation}
+
+The form of the heat equation we are studying demands that these be equal to each other. Solving for $u_{i+1, j}$, we obtain
+
+\begin{equation}
+    u_{i+1, j} = u_{i, j} + \frac{k}{h^2}[u_{i, j+1} - 2u_{i, j} + u_{i, j-1}]
+\end{equation}
+
+We now have a solution at each time step in terms of the solution at the previous time step. This gives us the following algorithm:
+
+
+\section{Finite difference scheme - implementation and results}
 
 \section{Neural networks}
 
