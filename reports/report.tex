@@ -159,6 +159,17 @@ We now have a solution at each time step in terms of the solution at the previou
 
 
 \section{Finite difference scheme - implementation and results}
+The above algorithm is implemented in \texttt{src/difference.py}. The testing is in \texttt{notebooks/solving-pde.ipynb}. In order to meet the stability criterion for the forward method, we begin by constructing a $11 \times 201$ grid, corresponding to step sizes of $\Delta x = 0.1$, $\Delta t = 0.005$. This just meets the stability criterion, since
+
+\begin{equation}
+    \frac{\Delta t}{\Delta x^2} = \frac{0.005}{0.01}=0.5
+\end{equation}
+
+In order to obtain even better approximations, we also construct a $101 \times 20001$ grid, corresponding to step sizes of $\Delta x = 0.01$, $\Delta t = 0.00005$. Again, this just meets the stability criterion, since
+
+\begin{equation}
+    \frac{\Delta t}{\Delta x^2} = \frac{0.00005}{0.0001}=0.5
+\end{equation}
 
 \section{Neural networks}
 
