@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rate=0.01):
+def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rate=0.01, tolerance=0.001):
     print('Neural')
     x_np = np.linspace(0, 1, Nx)
     t_np = np.linspace(0, t_end, Nt)
@@ -48,7 +48,11 @@ def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rat
         init.run()
         for i in range(num_iter):
             if i % 100 == 0:
-                print('Iteration {}. Loss: {}'.format(i, loss.eval()))
+                current_loss = loss.eval()
+                print('Iteration {}. Loss: {}'.format(i, current_loss))
+                # Stop early if loss is low:
+                if current_loss < tolerance:
+                    break
             sess.run(training_op)
         g_dnn = g_trial.eval()
         print(g_dnn)

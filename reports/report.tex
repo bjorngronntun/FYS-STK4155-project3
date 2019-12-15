@@ -171,11 +171,56 @@ In order to obtain even better approximations, we also construct a $101 \times 2
     \frac{\Delta t}{\Delta x^2} = \frac{0.00005}{0.0001}=0.5
 \end{equation}
 
-\section{Neural networks}
+In order to evaluate how well our numerical solutions approach the analytical solution, we look at the maximal value of the absolute differences between the two. We find that when using the $11 \times 201$ grid, we obtain a maximal absolute difference of 0.006, whereas when using the $101 \times 20001$ grid, the maximal absolute difference is reduced to $6.05 \cdot 10^{-5}$.
 
+\section{Neural networks}
+We now turn to a completely different method for obtaining numerical solutions of differential equations. A neural network should in principle be able to approximate the values of a function on a given input grid. We just have to make sure that the solutions proposed by our method actually fulfill the initial conditions and boundary conditions for our problem. How this is done is somewhat problem dependent, but it is usually possible to formulate a trial solution of the type
+
+\begin{equation}
+    g_{\textrm{trial}}(\mathbf{x}, t) = h_1(\mathbf{x}, t) + h_2(\mathbf{x}, t, N(\mathbf{x}, t, P))
+\end{equation}
+
+Here, $h_1$ depends on the inputs $\mathbf{x}, t$ only, whereas $h_2$ is allowed to depend on the outputs of the outputs of the neural network. The state of the neural network is given by $P$, which represents its weights and biases. The role of $h_1$ and $h_2$ is to make sure any solution respect the initial and boundary conditions. In our case, we choose
+
+\begin{env}
+    g_{\textrm{trial}}(x, t) = (1 - t)\sin(\pi x) + x(1 - x) t N(x, t, P)
+\end{env}
+
+It is easily verified that $g_{\textrm{trial}}(x, 0) = \sin(\pi x)$ for any value of $x$, meaning that any solution will conform to our initial condition. Moreover, we see that $g_{\textrm{trial}}(0, t) = g_{\textrm{trial}}(1, t) = 0$ for any value of $t$, which means that our solutions always respect our boundary conditions.
+
+We train our neural network by evaluating how well our trial solutions solve the PDE. As we want our solutions to solve
+
+\begin{equation}
+    u_t = u_{xx}
+\end{equation}
+
+that is
+
+\begin{equation}
+    u_t - u_{xx} = 0
+\end{equation}
+
+we use as our cost function $C = \textrm{MSE}((g_{\textrm{trial}})_t - (g_{\textrm{trial}})_{xx}, 0)$ and use this to train our network, thus obtaining gradually better approximations to the true solution.
+
+Our Tensorflow implementation of this method is tested in \texttt{notebooks/solving-pde.ipynb}.
 \section{Comparison of methods}
 
 \section{Eigenvalue problems}
+Given a matrix $A \in \mathbb{R}^{n \times n}$, an \textit{eigenpair} $(\lambda, x), x \neq 0$ is a solution of the equation
+
+\begin{equation}
+    Ax = \lambda x
+\end{equation}
+
+Here, the scalar $\lambda$ called an \textit{eigenvalue} and $x \in \mathbb{R}^n$ is a non-zero vector. Here, we only consider real symmetric matrices. It is easily proved that any eigenvalue of a real symmetric matrix is a real number. Finding eigenvectors and eigenvalues of such matrices is an important problem in engineering, and several numerical methods have been proposed. We here propose a simple method employing neural networks. Given any vector $x \in \mathbb{R}^n$, the corresponding Rayleigh quotient for a real symmetric matrix $A$ is defined as
+
+\begin{equation}
+    R_A(x) = \frac{x^T A x}{x^T x}
+\end{equation}
+
+A trivial fact is that if $x$ is an eigenvector, its Rayleigh quotient will be equal to the corresponding eigenvalue. Moreover, it can be shown that the Rayleigh quotient is maximized and minimized by two of matrix' eigenvectors. By maximizing or minimizing the Rayleigh quotient, we should therefore be able to find the eigenvectors corresponding to the largest and smallest eigenvalue. It is then a simple matter to find the eigenvalues using the Rayleigh quotient. The function \texttt{eigen} in \texttt{src/eigenvectors.py} works in the following way: A random vector is inputed into a dense neural network, yielding a proposed eigenvector as output. We compute the corresponding Rayleigh quotient and use gradient descent to update the weights of the network, thus reducing the Rayleigh quotient. This process is iterated until the reduction of the Rayleigh quotient in subsequent iterations gets below a certain tolerance, at which point we stop the process.
+
+In the notebook \texttt{notebooks/finding-eigenvalues.ipynb} we use our implementation to find unit eigenvectors of a $6 \times 6$ real symmetric matrix. We find that a neural net with 5 input nodes and two hidden layers, each with 5 nodes and tanh activation function, perfoms quite well. Comparison with the eigenvectors found by \texttt{numpy.linalg.eig} yields a mean squared deviation of $1.057 \cdot 10^{-13}$ for one eigenvector and $1.33 \cdot10^{-11}$ for the other.
 
 \section{Wrapping up}
 
