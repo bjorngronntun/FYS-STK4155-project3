@@ -9,13 +9,15 @@
 \maketitle
 
 \begin{abstract}
-    Neural networks have been shown to possess a general capability of mapping a given input to the correct output. We here show how this capability can be exploited to solve partial differential equations. We also use a similar technique to find the largest and smallest eigenvalue of a given real, symmetric square matrix. Comparisons with more traditional numerical methods are also performed.
+    Neural networks have been shown to possess a general capability of mapping a given input to the correct output. We here show how this capability can be exploited in the context of two representative problems in applied mathematics: Solving partial differential equations and computing eigenvectors and eigenvalues of a real symmetric matrix. Comparisons with more traditional numerical methods are also performed.
 \end{abstract}
 
 \section{Introduction}
-Although neural networks come in many versions, a quite common feature is that they process some kind of input (often represented by a vector in $\mathbb{R}^m$) which is then mapped to a output (often a vector in $\mathbb{R}^n$). If we have some way of measuring how well the output resembles the expected output, the weights of the network can be updated accordingly, thus yielding a better performance. Even though the most obvious application will be in constructing a predictive model from measurements, the neural network may also be used in other contexts. Here, we will consider partial differential equations and eigenvectors of real symmetric matrices. It will be shown that both these problems can be thought of as function approximation problems - we seek a neural network that find solutions that gradually become closer to the true solution.
+Although neural networks come in many versions, a quite common feature is that they process some kind of input (often represented by a vector in $\mathbb{R}^m$) which is then mapped to a output (often a vector in $\mathbb{R}^n$). If we have some way of measuring how well the output resembles the expected output, the weights of the network can be updated accordingly, thus yielding a better performance. Even though the most obvious application will be in a data science context, where our goal is to construct a predictive model from a set of measurements, neural network may also be used in other domains. Here, we will consider partial differential equations and eigenvectors of real symmetric matrices. It will be shown that both these problems can be thought of as function approximation problems - we seek a neural network that find solutions that gradually become closer to the true solution.
 
-The examples we study will be rather simple - the one-dimensional heat equation with Dirichlet boundary conditions and finding the eigenvectors corresponding to the smallest and largets eigenvalue for relatively small matrices. However, it should be possible to use similar methods to solve more complicated problems.
+The examples we study will be rather simple - the one-dimensional heat equation with Dirichlet boundary conditions and finding the eigenvectors corresponding to the smallest and largets eigenvalue for relatively small matrices. However, it should be possible to use similar methods to solve more complicated problems. We have been able to obtain very good results for the eigenvector problem, whereas when it comes to solving PDEs, our work seems promising, but should be further improved.
+
+As is often the case, this report only forms a small part of the entire research project. The corresponding code can be found in the Github repository \url{https://github.com/bjorngronntun/FYS-STK4155-project3}. The Python modules can be found in the \texttt{src} folder, whereas the Jupyter notebook where the results are obtained can be found in the \texttt{notebook} folder.
 
 \section{Heat equation - physical interpretation and analytical solution}
 If we have a rod of length $L=1$ with no lateral temperature loss, the temperature in the interior points of the rod can be modelled by a function $u(x, t)$, where $x\in (0, 1)$ is the distance from left point of the rod and $t$ is time. It is well established that the interior temperature will conform to the heat equation
@@ -221,7 +223,7 @@ Given a matrix $A \in \mathbb{R}^{n \times n}$, an \textit{eigenpair} $(\lambda,
     Ax = \lambda x
 \end{equation}
 
-Here, the scalar $\lambda$ called an \textit{eigenvalue} and $x \in \mathbb{R}^n$ is a non-zero vector. Here, we only consider real symmetric matrices. It is easily proved that any eigenvalue of a real symmetric matrix is a real number. Finding eigenvectors and eigenvalues of such matrices is an important problem in engineering, and several numerical methods have been proposed. We here propose a simple method employing neural networks. Given any vector $x \in \mathbb{R}^n$, the corresponding Rayleigh quotient for a real symmetric matrix $A$ is defined as
+Here, the scalar $\lambda$ called an \textit{eigenvalue} and $x \in \mathbb{R}^n$ is called an \textit{eigenvector}. Here, we only consider real symmetric matrices. It is easily proved that any eigenvalue of a real symmetric matrix is a real number. Finding eigenvectors and eigenvalues of such matrices is an important problem in engineering, and several numerical methods have been proposed for computing them. We here propose a very simple method employing neural networks. Given any non-zero vector $x \in \mathbb{R}^n$, the corresponding Rayleigh quotient for a real symmetric matrix $A$ is defined as
 
 \begin{equation}
     R_A(x) = \frac{x^T A x}{x^T x}
@@ -229,8 +231,25 @@ Here, the scalar $\lambda$ called an \textit{eigenvalue} and $x \in \mathbb{R}^n
 
 A trivial fact is that if $x$ is an eigenvector, its Rayleigh quotient will be equal to the corresponding eigenvalue. Moreover, it can be shown that the Rayleigh quotient is maximized and minimized by two of matrix' eigenvectors. By maximizing or minimizing the Rayleigh quotient, we should therefore be able to find the eigenvectors corresponding to the largest and smallest eigenvalue. It is then a simple matter to find the eigenvalues using the Rayleigh quotient. The function \texttt{eigen} in \texttt{src/eigenvectors.py} works in the following way: A random vector is inputed into a dense neural network, yielding a proposed eigenvector as output. We compute the corresponding Rayleigh quotient and use gradient descent to update the weights of the network, thus reducing the Rayleigh quotient. This process is iterated until the reduction of the Rayleigh quotient in subsequent iterations gets below a certain tolerance, at which point we stop the process.
 
-In the notebook \texttt{notebooks/finding-eigenvalues.ipynb} we use our implementation to find unit eigenvectors of a $6 \times 6$ real symmetric matrix. We find that a neural net with 5 input nodes and two hidden layers, each with 5 nodes and tanh activation function, perfoms quite well. Comparison with the eigenvectors found by \texttt{numpy.linalg.eig} yields a mean squared deviation of $1.057 \cdot 10^{-13}$ for one eigenvector and $1.33 \cdot10^{-11}$ for the other.
+In the notebook \texttt{notebooks/finding-eigenvalues.ipynb} we use our implementation to find unit eigenvectors of a $6 \times 6$ real symmetric matrix. We find that a neural net with 5 input nodes and two hidden layers, each with 5 nodes and tanh activation function, perfoms quite well. Comparison with the eigenvectors found by \texttt{numpy.linalg.eig} yields a mean squared deviation of $1.057 \cdot 10^{-13}$ for one eigenvector and $1.33 \cdot10^{-11}$ for the other. In practice, this suggests our simple method achieve state-of-the-art perfomance on this kind of problem, at least when accuracy is concerned.
 
 \section{Wrapping up}
 In this paper, we have studied two classical problems in applied mathematics: Solving partial differential equations and computing eigenvectors (which may be used to find eigenvalues.) Based on the idea that neural networks are capable of approximating functions, we have tried to obtain solutions to these problems using neural networks. Our results show that this is possible, but that further work should be conducted in order to obtain more effective and general methods.
+
+\begin{thebibliography}{3}
+    \bibitem{geron}
+    Aur\'elien G\'eron.
+    \textit{Hands-On Machine Learning with Scikit-Learn and TensorFlow}
+    O'Reilly, 2017
+
+    \bibitem{introduction}
+    Gareth James, Daniela Witten, Trevor Hastie, Robert Tibhirani.
+    \textit{An Introduction to Statistical Learning}
+    Springer, 2013
+
+    \bibitem{elements}
+    Kristine Baluka Hein.
+    \textit{Data Analysis and Machine Learning: Using Neural networks to solve ODEs and PDEs}
+    (\url{https://compphysics.github.io/MachineLearning/doc/pub/odenn/pdf/odenn-minted.pdf})
+\end{thebibliography}
 \end{document}
