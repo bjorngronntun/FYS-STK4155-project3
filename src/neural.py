@@ -47,7 +47,7 @@ def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rat
     with tf.Session() as sess:
         init.run()
         for i in range(num_iter):
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 current_loss = loss.eval()
                 print('Iteration {}. Loss: {}'.format(i, current_loss))
                 # Stop early if loss is low:

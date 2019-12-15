@@ -9,8 +9,13 @@
 \maketitle
 
 \begin{abstract}
-    This is rather abstract.
+    Neural networks have been shown to possess a general capability of mapping a given input to the correct output. We here show how this capability can be exploited to solve partial differential equations. We also use a similar technique to find the largest and smallest eigenvalue of a given real, symmetric square matrix. Comparisons with more traditional numerical methods are also performed.
 \end{abstract}
+
+\section{Introduction}
+Although neural networks come in many versions, a quite common feature is that they process some kind of input (often represented by a vector in $\mathbb{R}^m$) which is then mapped to a output (often a vector in $\mathbb{R}^n$). If we have some way of measuring how well the output resembles the expected output, the weights of the network can be updated accordingly, thus yielding a better performance. Even though the most obvious application will be in constructing a predictive model from measurements, the neural network may also be used in other contexts. Here, we will consider partial differential equations and eigenvectors of real symmetric matrices. It will be shown that both these problems can be thought of as function approximation problems - we seek a neural network that find solutions that gradually become closer to the true solution.
+
+The examples we study will be rather simple - the one-dimensional heat equation with Dirichlet boundary conditions and finding the eigenvectors corresponding to the smallest and largets eigenvalue for relatively small matrices. However, it should be possible to use similar methods to solve more complicated problems.
 
 \section{Heat equation - physical interpretation and analytical solution}
 If we have a rod of length $L=1$ with no lateral temperature loss, the temperature in the interior points of the rod can be modelled by a function $u(x, t)$, where $x\in (0, 1)$ is the distance from left point of the rod and $t$ is time. It is well established that the interior temperature will conform to the heat equation
@@ -124,6 +129,8 @@ and
 
 where $i = 0, 1, ..., m$.
 
+When the grid has been properly defined, we can compute the values of our analytical solution on each point on the grid. As we develop our numerical solutions, they will be computed on the grid point as well. In order to measure how well the numerical solutions approach the analytical solution, we have chosen to opt for the maximal value of the absolute values of the differences between the numerical and the analytical solution. Of course, this only gives us information about the "worst case" approximation rather than the overall performance. In principle, a solution could be very good on most of the grid, but still bad according to this measure. Whether this error measurement is the correct one is certainly problem dependent, but we have chosen to use it due to its being very easy to compute.
+
 \section{Finite difference scheme - theory}
 In order to construct a finite-difference scheme to solve the heat equation, we use truncated forms of the Taylor series for $u$ to obtain the following approximations:
 
@@ -155,11 +162,11 @@ The form of the heat equation we are studying demands that these be equal to eac
     u_{i+1, j} = u_{i, j} + \frac{k}{h^2}[u_{i, j+1} - 2u_{i, j} + u_{i, j-1}]
 \end{equation}
 
-We now have a solution at each time step in terms of the solution at the previous time step. This gives us the following algorithm:
+We now have a solution at each time step in terms of the solution at the previous time step. As we know the solution at $i=0$ (which corresponds to the initial condition), we now have a simple algorithm for moving forward in time and computing the solution for $i=1, ..., m$.
 
 
 \section{Finite difference scheme - implementation and results}
-The above algorithm is implemented in \texttt{src/difference.py}. The testing is in \texttt{notebooks/solving-pde.ipynb}. In order to meet the stability criterion for the forward method, we begin by constructing a $11 \times 201$ grid, corresponding to step sizes of $\Delta x = 0.1$, $\Delta t = 0.005$. This just meets the stability criterion, since
+The forward-difference method is implemented in \texttt{src/difference.py}. The testing is in \texttt{notebooks/solving-pde.ipynb}. In order to meet the stability criterion for this method, we begin by constructing a $11 \times 201$ grid, corresponding to step sizes of $\Delta x = 0.1$, $\Delta t = 0.005$. This just meets the stability criterion, since
 
 \begin{equation}
     \frac{\Delta t}{\Delta x^2} = \frac{0.005}{0.01}=0.5
@@ -171,7 +178,7 @@ In order to obtain even better approximations, we also construct a $101 \times 2
     \frac{\Delta t}{\Delta x^2} = \frac{0.00005}{0.0001}=0.5
 \end{equation}
 
-In order to evaluate how well our numerical solutions approach the analytical solution, we look at the maximal value of the absolute differences between the two. We find that when using the $11 \times 201$ grid, we obtain a maximal absolute difference of 0.006, whereas when using the $101 \times 20001$ grid, the maximal absolute difference is reduced to $6.05 \cdot 10^{-5}$.
+In order to evaluate how well our numerical solutions approach the analytical solution, we look at the maximal value of the absolute differences between the two. The relevant computations are in \texttt{notebooks/solving-pde.ipynb}. We find that when using the $11 \times 201$ grid, we obtain a maximal absolute difference of 0.006, whereas when using the $101 \times 20001$ grid, the maximal absolute difference is reduced to $6.05 \cdot 10^{-5}$.
 
 \section{Neural networks}
 We now turn to a completely different method for obtaining numerical solutions of differential equations. A neural network should in principle be able to approximate the values of a function on a given input grid. We just have to make sure that the solutions proposed by our method actually fulfill the initial conditions and boundary conditions for our problem. How this is done is somewhat problem dependent, but it is usually possible to formulate a trial solution of the type
@@ -182,9 +189,9 @@ We now turn to a completely different method for obtaining numerical solutions o
 
 Here, $h_1$ depends on the inputs $\mathbf{x}, t$ only, whereas $h_2$ is allowed to depend on the outputs of the outputs of the neural network. The state of the neural network is given by $P$, which represents its weights and biases. The role of $h_1$ and $h_2$ is to make sure any solution respect the initial and boundary conditions. In our case, we choose
 
-\begin{env}
+\begin{equation}
     g_{\textrm{trial}}(x, t) = (1 - t)\sin(\pi x) + x(1 - x) t N(x, t, P)
-\end{env}
+\end{equation}
 
 It is easily verified that $g_{\textrm{trial}}(x, 0) = \sin(\pi x)$ for any value of $x$, meaning that any solution will conform to our initial condition. Moreover, we see that $g_{\textrm{trial}}(0, t) = g_{\textrm{trial}}(1, t) = 0$ for any value of $t$, which means that our solutions always respect our boundary conditions.
 
@@ -202,8 +209,10 @@ that is
 
 we use as our cost function $C = \textrm{MSE}((g_{\textrm{trial}})_t - (g_{\textrm{trial}})_{xx}, 0)$ and use this to train our network, thus obtaining gradually better approximations to the true solution.
 
-Our Tensorflow implementation of this method is tested in \texttt{notebooks/solving-pde.ipynb}.
+Our Tensorflow implementation of this method is in \texttt{src/neural.py} and the results are obtained in \texttt{notebooks/solving-pde.ipynb}. For the $11 \times 201$ grid, we obtain quite good results with two hidden layers, each with twenty neurons and tanh activation functions. The maximal absolute difference between our solution and the analytical solution is 0.008, which is somewhat larger than the result obtained by the forward-difference method, but this could probably be improved further. For the $101 \times 20001$ grid our implemention became unacceptably slow, and we were not able to obtain any results.
+
 \section{Comparison of methods}
+As we have shown, the neural networks are able to obtain acceptable results in comparison with a more traditional forward-difference method. The neural network approach, however, is much slower. This may be alleviated in different ways - one could try running our implementation on faster machines or utilizing the GPU. It may also be an idea to try stochastic gradient descent in this case. The advantage of the neural network based method is perhaps not so much in speed as in ease of implementation. In our case, we were able to develop a finite-difference algorithm quite easily, but there may be cases where that is much more difficult, and in those cases the neural network based method should compete favourably.
 
 \section{Eigenvalue problems}
 Given a matrix $A \in \mathbb{R}^{n \times n}$, an \textit{eigenpair} $(\lambda, x), x \neq 0$ is a solution of the equation
@@ -223,14 +232,5 @@ A trivial fact is that if $x$ is an eigenvector, its Rayleigh quotient will be e
 In the notebook \texttt{notebooks/finding-eigenvalues.ipynb} we use our implementation to find unit eigenvectors of a $6 \times 6$ real symmetric matrix. We find that a neural net with 5 input nodes and two hidden layers, each with 5 nodes and tanh activation function, perfoms quite well. Comparison with the eigenvectors found by \texttt{numpy.linalg.eig} yields a mean squared deviation of $1.057 \cdot 10^{-13}$ for one eigenvector and $1.33 \cdot10^{-11}$ for the other.
 
 \section{Wrapping up}
-
-
-
-
-
-
-
-
-
-
+In this paper, we have studied two classical problems in applied mathematics: Solving partial differential equations and computing eigenvectors (which may be used to find eigenvalues.) Based on the idea that neural networks are capable of approximating functions, we have tried to obtain solutions to these problems using neural networks. Our results show that this is possible, but that further work should be conducted in order to obtain more effective and general methods.
 \end{document}
