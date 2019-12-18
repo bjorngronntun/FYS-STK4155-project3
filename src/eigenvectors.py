@@ -2,6 +2,19 @@ import numpy as np
 import tensorflow as tf
 
 def eigen(A_np, inputs, num_hidden_neurons, num_iter=1000, learning_rate=0.01, tolerance=0.0001, max_value=True):
+    """
+    Finds largest or smallest eigenvalue of symmetric matrix using neural network methods
+    Inputs:     A_np                np array: Quadratic symmetric np matrix
+                inputs              int: Number of neurons in input layer
+                num_hidden_neurons  list: Numbers of neurons in hidden layers
+                num_iter            int: Number of iterations for training
+                learning_rate       float: Learning rate for training
+                tolerance           float: Training stops if difference in norm between two iterations falls below this
+                max_value           boolean: True if max eigenvalue is wanted, False if min eigenvalue is wanted
+
+    Output:     eigenvector corresponding to min or max eigenvalue
+
+    """
     np.random.seed(21)
     input_tensor = tf.reshape(tf.convert_to_tensor(np.random.randn(inputs)), shape=(-1, 1))
     A = tf.convert_to_tensor(A_np)

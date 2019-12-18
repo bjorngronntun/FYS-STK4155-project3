@@ -3,6 +3,15 @@ import matplotlib.pyplot as plt
 
 
 def difference(t_end, Nx, Nt):
+    """
+    Computes solution of heat equation with predefined initial/boundary
+    conditions, using forward-difference method
+    Inputs:         t_end       float, max value of t
+                    Nx          int, number of grid lines in x direction
+                    Nt          int, number of grid lines in t direction
+
+    Returns:        solution    np array, function values on grid
+    """
     x_np = np.linspace(0, 1, Nx)
     t_np = np.linspace(0, t_end, Nt)
 

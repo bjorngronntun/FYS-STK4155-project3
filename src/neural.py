@@ -2,6 +2,20 @@ import numpy as np
 import tensorflow as tf
 
 def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rate=0.01, tolerance=0.001):
+    """
+    Computes solution of heat equation with predefined initial/boundary
+    conditions, using a neural network
+    Inputs:         t_end       float, max value of t
+                    Nx          int, number of grid lines in x direction
+                    Nt          int, number of grid lines in t direction
+                    num_hidden_neurons  list: Numbers of neurons in hidden layers
+                    num_iter            int: Number of iterations for training
+                    learning_rate       float: Learning rate for training
+                    tolerance           float: Training stops current value of loss function drops below this
+
+
+    Returns:        solution    np array, function values on grid
+    """
     print('Neural')
     x_np = np.linspace(0, 1, Nx)
     t_np = np.linspace(0, t_end, Nt)
@@ -42,7 +56,6 @@ def neural(t_end, Nx, Nt, num_hidden_neurons = [90], num_iter=1000, learning_rat
 
     init = tf.global_variables_initializer()
 
-    # Something missing here.
     g_dnn = None
     with tf.Session() as sess:
         init.run()

@@ -229,7 +229,21 @@ Here, the scalar $\lambda$ called an \textit{eigenvalue} and $x \in \mathbb{R}^n
     R_A(x) = \frac{x^T A x}{x^T x}
 \end{equation}
 
-A trivial fact is that if $x$ is an eigenvector, its Rayleigh quotient will be equal to the corresponding eigenvalue. Moreover, it can be shown that the Rayleigh quotient is maximized and minimized by two of matrix' eigenvectors. By maximizing or minimizing the Rayleigh quotient, we should therefore be able to find the eigenvectors corresponding to the largest and smallest eigenvalue. It is then a simple matter to find the eigenvalues using the Rayleigh quotient. The function \texttt{eigen} in \texttt{src/eigenvectors.py} works in the following way: A random vector is inputed into a dense neural network, yielding a proposed eigenvector as output. We compute the corresponding Rayleigh quotient and use gradient descent to update the weights of the network, thus reducing the Rayleigh quotient. This process is iterated until the reduction of the Rayleigh quotient in subsequent iterations gets below a certain tolerance, at which point we stop the process.
+A trivial fact is that if $x$ is an eigenvector, its Rayleigh quotient will be equal to the corresponding eigenvalue. Moreover, it can be shown that the Rayleigh quotient is maximized and minimized by two of matrix' eigenvectors. This is quite easy to the show in the case where $A$ is symmetric, because then $A$ has a spectral decomposition $A=UDU^T$, where $U$ is orthogonal and $D$ is diagonal with the eigenvalues of $A$ on the diagonal. By putting $y=U^T x$ and noting that the condition $x \neq 0$ will be equivalent to $ y \neq 0$, since $U$ is non-singular, we get
+
+\begin{align}
+    \max_{x \neq 0}{R_A (x)}
+    &=\max_{x \neq 0}{\frac{x^T A x}{x^T x}}\\
+    &=\max_{x \neq 0}{\frac{x^T U D U^T x}{x^T x}}\\
+    &=\max_{y \neq 0}{\frac{y^T D y}{y^T y}}\\
+    &=\max_{y \neq 0}{ \frac{\sum_{i=1}^{n}{\lambda_i {y_i}^2 } } { \sum_{i=1}^{n} { {y_i}^2 } } } \\
+    &\leq \frac{ \lambda_1  { \sum_{i=1}^{n} { {y_i}^2 } }} {  \sum_{i=1}^{n} { {y_i}^2 } }\\
+    &=\lambda_1
+\end{align}
+
+So the Rayleigh quotient is bounded above by the largest eigenvalue $\lambda_1$. As this value is actually attained by the corresponding eigenvector, we conclude that this eigenvector maximizes $R_A (x)$. In the same way, we can show that the minimum value is $\lambda_n$, the smallest eigenvalue, which is attained by another eigenvector.
+
+By maximizing or minimizing the Rayleigh quotient, we should therefore be able to find the eigenvectors corresponding to the largest and smallest eigenvalue. It is then a simple matter to find the eigenvalues using the Rayleigh quotient. The function \texttt{eigen} in \texttt{src/eigenvectors.py} works in the following way: A random vector is inputed into a dense neural network, yielding a proposed eigenvector as output. We compute the corresponding Rayleigh quotient and use gradient descent to update the weights of the network, thus reducing the Rayleigh quotient. This process is iterated until the reduction of the Rayleigh quotient in subsequent iterations gets below a certain tolerance, at which point we stop the process.
 
 In the notebook \texttt{notebooks/finding-eigenvalues.ipynb} we use our implementation to find unit eigenvectors of a $6 \times 6$ real symmetric matrix. We find that a neural net with 5 input nodes and two hidden layers, each with 5 nodes and tanh activation function, perfoms quite well. Comparison with the eigenvectors found by \texttt{numpy.linalg.eig} yields a mean squared deviation of $1.057 \cdot 10^{-13}$ for one eigenvector and $1.33 \cdot10^{-11}$ for the other. In practice, this suggests our simple method achieve state-of-the-art perfomance on this kind of problem, at least when accuracy is concerned.
 
@@ -251,5 +265,10 @@ In this paper, we have studied two classical problems in applied mathematics: So
     Kristine Baluka Hein.
     \textit{Data Analysis and Machine Learning: Using Neural networks to solve ODEs and PDEs}
     (\url{https://compphysics.github.io/MachineLearning/doc/pub/odenn/pdf/odenn-minted.pdf})
+
+    \bibitem{elements}
+    Zhang Yi, Yan Fu, Hua Jin Tang
+    \textit{Neural Networks Based Approach for Computing Eigenvectors and Eigenvalues of Symmetric Matrix}
+    (\url{https://www.sciencedirect.com/science/article/pii/S0898122104901101})
 \end{thebibliography}
 \end{document}
